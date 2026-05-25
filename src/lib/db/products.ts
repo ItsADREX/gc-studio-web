@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createReadonlyClient } from "@/lib/supabase/readonly";
 import { Product } from "@/types";
 
 function dbRowToProduct(row: Record<string, unknown>): Product {
@@ -19,34 +19,44 @@ export async function getProducts(options?: {
   category?: string;
   featured?: boolean;
 }): Promise<Product[]> {
-  const supabase = await createClient();
-  let query = supabase.from("products").select("*").order("created_at", { ascending: false });
+  try {
+    const supabase = createReadonlyClient();
+    let query = supabase.from("products").select("*").order("created_at", { ascending: false });
 
-  if (options?.category) {
-    query = query.eq("category", options.category);
-  }
-  if (options?.featured !== undefined) {
-    query = query.eq("featured", options.featured);
-  }
+    if (options?.category) {
+      query = query.eq("category", options.category);
+    }
+    if (options?.featured !== undefined) {
+      query = query.eq("featured", options.featured);
+    }
 
-  const { data, error } = await query;
-  if (error) {
-    console.error("Error fetching products:", error);
+    const { data, error } = await query;
+    if (error) {
+      console.error("Error fetching products:", error);
+      return [];
+    }
+    return (data ?? []).map(dbRowToProduct);
+  } catch (err) {
+    console.error("Supabase getProducts failed:", err);
     return [];
   }
-  return (data ?? []).map(dbRowToProduct);
 }
 
 export async function getProductById(id: string): Promise<Product | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("id", id)
-    .single();
+  try {
+    const supabase = createReadonlyClient();
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .eq("id", id)
+      .single();
 
-  if (error || !data) return null;
-  return dbRowToProduct(data);
+    if (error || !data) return null;
+    return dbRowToProduct(data);
+  } catch (err) {
+    console.error("Supabase getProductById failed:", err);
+    return null;
+  }
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
@@ -54,12 +64,17 @@ export async function getFeaturedProducts(): Promise<Product[]> {
 }
 
 export async function getCategories(): Promise<string[]> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("category");
+  try {
+    const supabase = createReadonlyClient();
+    const { data, error } = await supabase
+      .from("products")
+      .select("category");
 
-  if (error || !data) return [];
-  const unique = Array.from(new Set(data.map((r) => r.category as string))).sort();
-  return ["All", ...unique];
+    if (error || !data) return [];
+    const unique = Array.from(new Set(data.map((r: { category: string }) => r.category))).sort();
+    return ["All", ...unique];
+  } catch (err) {
+    console.error("Supabase getCategories failed:", err);
+    return [];
+  }
 }
