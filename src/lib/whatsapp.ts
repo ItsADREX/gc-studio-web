@@ -27,16 +27,13 @@ export function buildWhatsAppOrderUrl(items: CartItem[]): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
-export function buildSingleProductWhatsAppUrl(
-  productName: string,
-  price: number
-): string {
+export function buildSingleProductWhatsAppUrl(productName: string): string {
   const message = [
     `Hello GC Studios! 🧶 I'm interested in ordering:`,
     "",
-    `• ${productName} — ₦${price.toLocaleString()}`,
+    `• ${productName}`,
     "",
-    "Please confirm availability and share shipping details. Thank you! 😊",
+    "Please share the price, availability, and shipping details. Thank you! 😊",
   ].join("\n");
 
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;

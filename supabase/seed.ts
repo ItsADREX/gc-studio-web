@@ -1,6 +1,11 @@
-import { Product } from "@/types";
+import { createClient } from "@supabase/supabase-js";
 
-export const products: Product[] = [
+const supabaseUrl = "https://uazvboudqcuqreuumzqg.supabase.co";
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+const products = [
   {
     id: "slouch-beanie",
     name: "Slouch Beanie",
@@ -10,7 +15,7 @@ export const products: Product[] = [
     category: "Headwear",
     images: ["/images/products/beanie.jpg"],
     featured: true,
-    inStock: true,
+    in_stock: true,
     tags: ["headwear", "beanie", "winter"],
   },
   {
@@ -22,7 +27,7 @@ export const products: Product[] = [
     category: "Tops",
     images: ["/images/products/corset.jpg"],
     featured: true,
-    inStock: true,
+    in_stock: true,
     tags: ["tops", "corset", "fashion", "statement"],
   },
   {
@@ -38,7 +43,7 @@ export const products: Product[] = [
       "/images/products/shorts-3.jpg",
     ],
     featured: true,
-    inStock: true,
+    in_stock: true,
     tags: ["bottoms", "shorts", "beach", "summer"],
   },
   {
@@ -53,7 +58,7 @@ export const products: Product[] = [
       "/images/products/earrings-2.jpg",
     ],
     featured: true,
-    inStock: true,
+    in_stock: true,
     tags: ["accessories", "earrings", "jewelry", "boho"],
   },
   {
@@ -69,7 +74,7 @@ export const products: Product[] = [
       "/images/products/scrunchie-3.jpg",
     ],
     featured: false,
-    inStock: true,
+    in_stock: true,
     tags: ["accessories", "hair", "scrunchie", "gift"],
   },
   {
@@ -84,7 +89,7 @@ export const products: Product[] = [
       "/images/products/baby-cap-2.jpg",
     ],
     featured: false,
-    inStock: true,
+    in_stock: true,
     tags: ["baby", "cap", "gift", "newborn"],
   },
   {
@@ -96,7 +101,7 @@ export const products: Product[] = [
     category: "Accessories",
     images: ["/images/products/gloves.jpg"],
     featured: false,
-    inStock: true,
+    in_stock: true,
     tags: ["accessories", "gloves", "winter", "autumn"],
   },
   {
@@ -113,7 +118,7 @@ export const products: Product[] = [
       "/images/products/headwarmer-4.jpg",
     ],
     featured: true,
-    inStock: true,
+    in_stock: true,
     tags: ["headwear", "headband", "winter", "earwarmer"],
   },
   {
@@ -125,7 +130,7 @@ export const products: Product[] = [
     category: "Dresses",
     images: ["/images/products/dress-1.jpg"],
     featured: true,
-    inStock: true,
+    in_stock: true,
     tags: ["dresses", "mini", "summer", "statement", "colourful"],
   },
   {
@@ -141,7 +146,7 @@ export const products: Product[] = [
       "/images/products/crop-sweater-3.jpg",
     ],
     featured: true,
-    inStock: true,
+    in_stock: true,
     tags: ["tops", "sweater", "granny-square", "cozy", "pink"],
   },
   {
@@ -153,7 +158,7 @@ export const products: Product[] = [
     category: "Tops",
     images: ["/images/products/crop-top-1.jpg"],
     featured: false,
-    inStock: true,
+    in_stock: true,
     tags: ["tops", "crop", "summer", "light"],
   },
   {
@@ -165,7 +170,7 @@ export const products: Product[] = [
     category: "Tops",
     images: ["/images/products/mini-jacket-1.jpg"],
     featured: false,
-    inStock: true,
+    in_stock: true,
     tags: ["tops", "jacket", "granny-square", "boho", "layering"],
   },
   {
@@ -177,7 +182,7 @@ export const products: Product[] = [
     category: "Bottoms",
     images: ["/images/products/skirt-1.jpg"],
     featured: true,
-    inStock: true,
+    in_stock: true,
     tags: ["bottoms", "skirt", "maxi", "pink", "mesh", "statement"],
   },
   {
@@ -193,7 +198,7 @@ export const products: Product[] = [
       "/images/products/bikini-shorts-3.jpg",
     ],
     featured: false,
-    inStock: true,
+    in_stock: true,
     tags: ["bottoms", "shorts", "bikini", "beach", "summer"],
   },
   {
@@ -205,7 +210,7 @@ export const products: Product[] = [
     category: "Headwear",
     images: ["/images/products/bucket-hat-1.jpg"],
     featured: false,
-    inStock: true,
+    in_stock: true,
     tags: ["headwear", "hat", "bucket", "checkered", "summer"],
   },
   {
@@ -221,7 +226,7 @@ export const products: Product[] = [
       "/images/products/outfit-3.jpg",
     ],
     featured: true,
-    inStock: true,
+    in_stock: true,
     tags: ["sets", "co-ord", "outfit", "full-set", "statement"],
   },
   {
@@ -239,7 +244,7 @@ export const products: Product[] = [
       "/images/products/benni-5.jpg",
     ],
     featured: false,
-    inStock: true,
+    in_stock: true,
     tags: ["headwear", "beanie", "benni", "cozy", "colourful"],
   },
   {
@@ -251,20 +256,23 @@ export const products: Product[] = [
     category: "Tops",
     images: ["/images/products/top-1.jpg"],
     featured: false,
-    inStock: true,
+    in_stock: true,
     tags: ["tops", "fashion", "handmade"],
   },
 ];
 
-export const categories = [
-  "All",
-  "Tops",
-  "Bottoms",
-  "Dresses",
-  "Sets",
-  "Headwear",
-  "Accessories",
-  "Baby",
-];
+async function seed() {
+  console.log("Seeding products...");
+  const { data, error } = await supabase
+    .from("products")
+    .upsert(products, { onConflict: "id" });
 
-export const featuredProducts = products.filter((p) => p.featured);
+  if (error) {
+    console.error("Error seeding products:", error);
+    process.exit(1);
+  }
+
+  console.log(`✅ Seeded ${products.length} products successfully`);
+}
+
+seed();

@@ -3,9 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Heart, ShoppingBag, MessageCircle } from "lucide-react";
+import { Heart, MessageCircle } from "lucide-react";
 import { Product } from "@/types";
-import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { buildSingleProductWhatsAppUrl } from "@/lib/whatsapp";
 
@@ -14,13 +13,12 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const inWishlist = isInWishlist(product.id);
 
   const handleWhatsAppOrder = (e: React.MouseEvent) => {
     e.preventDefault();
-    const url = buildSingleProductWhatsAppUrl(product.name, product.price);
+    const url = buildSingleProductWhatsAppUrl(product.name);
     window.open(url, "_blank");
   };
 
@@ -80,21 +78,16 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.description}
         </p>
         <div className="flex items-center justify-between mt-3">
-          <span className="font-display font-bold text-brand-rose text-lg">
-            ₦{product.price.toLocaleString()}
-          </span>
-          <button
-            onClick={() => product.inStock && addToCart(product)}
-            disabled={!product.inStock}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
-              product.inStock
-                ? "bg-brand-pink hover:bg-brand-rose hover:text-white text-brand-dark"
-                : "bg-brand-gray text-brand-muted cursor-not-allowed"
-            }`}
+          <a
+            href={buildSingleProductWhatsAppUrl(product.name)}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-brand-rose hover:text-brand-dark transition-colors"
           >
-            <ShoppingBag className="w-3.5 h-3.5" />
-            Add to Cart
-          </button>
+            <MessageCircle className="w-3.5 h-3.5" />
+            Contact for price
+          </a>
         </div>
       </div>
     </motion.div>

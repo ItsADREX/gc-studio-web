@@ -4,7 +4,7 @@ import { useCart } from "@/context/CartContext";
 import { buildWhatsAppOrderUrl } from "@/lib/whatsapp";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
-import { X, Minus, Plus, ShoppingBag, MessageCircle, Trash2 } from "lucide-react";
+import { X, Minus, Plus, ShoppingBag, MessageCircle, Trash2, Info } from "lucide-react";
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, removeFromCart, updateQuantity, totalPrice, totalItems } =
@@ -94,8 +94,9 @@ export default function CartDrawer() {
                         <p className="font-display font-semibold text-brand-dark text-sm leading-tight">
                           {item.product.name}
                         </p>
-                        <p className="text-brand-rose font-semibold text-sm mt-1">
-                          ₦{item.product.price.toLocaleString()}
+                        <p className="inline-flex items-center gap-1 text-brand-rose text-xs mt-1">
+                          <Info className="w-3 h-3" />
+                          Contact for price
                         </p>
                         <div className="flex items-center justify-between mt-3">
                           <div className="flex items-center gap-2 bg-white rounded-full px-2 py-1 border border-brand-nude">
@@ -142,9 +143,9 @@ export default function CartDrawer() {
             {items.length > 0 && (
               <div className="p-6 border-t border-brand-nude space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-brand-text font-medium">Total</span>
-                  <span className="font-display text-xl font-bold text-brand-dark">
-                    ₦{totalPrice.toLocaleString()}
+                  <span className="text-brand-text font-medium">Items</span>
+                  <span className="font-display text-base font-semibold text-brand-muted">
+                    Prices confirmed via WhatsApp
                   </span>
                 </div>
                 <button
