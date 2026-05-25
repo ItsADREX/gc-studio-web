@@ -11,7 +11,7 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const ADMIN_EMAIL = "salamigift25@gmail.com";
+  const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "salamigift25@gmail.com";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
