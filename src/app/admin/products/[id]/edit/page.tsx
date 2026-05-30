@@ -1,5 +1,5 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect, notFound } from "next/navigation";
+import { createReadonlyClient } from "@/lib/supabase/readonly";
+import { notFound } from "next/navigation";
 import ProductForm from "@/components/admin/ProductForm";
 import { Product } from "@/types";
 
@@ -10,12 +10,7 @@ interface EditProductPageProps {
 export default async function EditProductPage({ params }: EditProductPageProps) {
   const { id } = await params;
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/admin/login");
-
+  const supabase = createReadonlyClient();
   const { data, error } = await supabase
     .from("products")
     .select("*")

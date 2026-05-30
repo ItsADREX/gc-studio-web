@@ -1,5 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
+import { createReadonlyClient } from "@/lib/supabase/readonly";
 import Link from "next/link";
 import Image from "next/image";
 import { products as staticProducts } from "@/data/products";
@@ -8,13 +7,7 @@ import AdminSeedButton from "@/components/admin/AdminSeedButton";
 import { Plus, LogOut, Package, Star } from "lucide-react";
 
 export default async function AdminDashboardPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) redirect("/admin/login");
-
+  const supabase = createReadonlyClient();
   const { data: products, error } = await supabase
     .from("products")
     .select("*")
@@ -36,16 +29,13 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-xs text-brand-muted hidden sm:block">{user.email}</span>
-            <form action="/admin/auth/signout" method="POST">
-              <Link
-                href="/admin/auth/signout"
-                className="flex items-center gap-1.5 text-xs text-brand-muted hover:text-red-500 transition-colors px-3 py-2 rounded-xl hover:bg-red-50"
-              >
-                <LogOut className="w-4 h-4" />
-                Sign out
-              </Link>
-            </form>
+            <Link
+              href="/admin/auth/signout"
+              className="flex items-center gap-1.5 text-xs text-brand-muted hover:text-red-500 transition-colors px-3 py-2 rounded-xl hover:bg-red-50"
+            >
+              <LogOut className="w-4 h-4" />
+              Sign out
+            </Link>
           </div>
         </div>
       </header>

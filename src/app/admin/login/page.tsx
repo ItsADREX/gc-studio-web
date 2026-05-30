@@ -1,47 +1,41 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
-import { Mail, Send, CheckCircle, Lock } from "lucide-react";
+import { Lock, Eye, EyeOff, LogIn } from "lucide-react";
 
 export default function AdminLoginPage() {
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const ADMIN_EMAIL = process.env.NEXT_PUBLIC_ADMIN_EMAIL ?? "salamigift25@gmail.com";
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-
-    if (email.toLowerCase().trim() !== ADMIN_EMAIL) {
-      setError("Access denied. This admin panel is restricted.");
-      return;
-    }
-
     setLoading(true);
-    const supabase = createClient();
-    const { error: authError } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/admin/auth/callback`,
-      },
+
+    const res = await fetch("/admin/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
     });
 
-    if (authError) {
-      setError(authError.message);
+    if (res.ok) {
+      router.push("/admin/dashboard");
+      router.refresh();
     } else {
-      setSent(true);
+      const data = await res.json();
+      setError(data.error ?? "Incorrect password.");
     }
     setLoading(false);
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-nude via-white to-brand-pink/20 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-sm">
         <div className="bg-white rounded-3xl shadow-xl p-8 border border-brand-nude">
           <div className="flex flex-col items-center mb-8">
             <div className="relative w-16 h-16 rounded-full overflow-hidden ring-4 ring-brand-pink/40 mb-4">
@@ -61,63 +55,50 @@ export default function AdminLoginPage() {
             </p>
           </div>
 
-          {sent ? (
-            <div className="text-center space-y-4">
-              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto">
-                <CheckCircle className="w-8 h-8 text-green-500" />
+          <form onSubmit={handleLogin} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-brand-dark mb-2">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter admin password"
+                  required
+                  autoFocus
+                  className="w-full pl-4 pr-11 py-3 rounded-2xl border border-brand-nude bg-white text-sm text-brand-dark placeholder-brand-muted focus:outline-none focus:border-brand-rose transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand-dark transition-colors"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
               </div>
-              <h2 className="font-display text-xl font-semibold text-brand-dark">
-                Check your email!
-              </h2>
-              <p className="text-brand-muted text-sm leading-relaxed">
-                A magic login link has been sent to{" "}
-                <span className="font-semibold text-brand-rose">{email}</span>.
-                Click the link to access the admin panel.
-              </p>
-              <p className="text-brand-muted text-xs">
-                The link expires in 1 hour. Check your spam folder if you
-                don&apos;t see it.
-              </p>
             </div>
-          ) : (
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div>
-                <label className="block text-sm font-medium text-brand-dark mb-2">
-                  Admin Email
-                </label>
-                <div className="relative">
-                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-brand-muted" />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email address"
-                    required
-                    className="w-full pl-10 pr-4 py-3 rounded-2xl border border-brand-nude bg-white text-sm text-brand-dark placeholder-brand-muted focus:outline-none focus:border-brand-rose transition-colors"
-                  />
-                </div>
-              </div>
 
-              {error && (
-                <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl">
-                  {error}
-                </p>
+            {error && (
+              <p className="text-red-500 text-sm bg-red-50 px-4 py-3 rounded-xl">
+                {error}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || !password}
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-brand-dark hover:bg-brand-rose text-white font-semibold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <LogIn className="w-4 h-4" />
               )}
-
-              <button
-                type="submit"
-                disabled={loading || !email}
-                className="w-full flex items-center justify-center gap-2 py-3.5 bg-brand-dark hover:bg-brand-rose text-white font-semibold rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {loading ? (
-                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <Send className="w-4 h-4" />
-                )}
-                {loading ? "Sending..." : "Send Magic Link"}
-              </button>
-            </form>
-          )}
+              {loading ? "Checking..." : "Sign In"}
+            </button>
+          </form>
         </div>
       </div>
     </div>
