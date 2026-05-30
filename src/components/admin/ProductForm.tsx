@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { Product } from "@/types";
+
 import {
   Upload,
   X,
@@ -100,7 +101,6 @@ export default function ProductForm({ product, isEdit = false }: ProductFormProp
     setSaving(true);
     setError("");
 
-    const supabase = createClient();
     const tagArray = tags
       .split(",")
       .map((t) => t.trim().toLowerCase())
@@ -118,12 +118,20 @@ export default function ProductForm({ product, isEdit = false }: ProductFormProp
       tags: tagArray,
     };
 
-    const { error: dbError } = isEdit
-      ? await supabase.from("products").update(row).eq("id", product!.id)
-      : await supabase.from("products").insert(row);
+    const apiUrl = isEdit
+      ? `/admin/api/products/${product!.id}`
+      : `/admin/api/products/new`;
+    const method = isEdit ? "PATCH" : "POST";
 
-    if (dbError) {
-      setError(dbError.message);
+    const res = await fetch(apiUrl, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(row),
+    });
+
+    if (!res.ok) {
+      const data = await res.json();
+      setError(data.error ?? "Failed to save product.");
       setSaving(false);
       return;
     }

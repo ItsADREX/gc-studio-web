@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Trash2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
 
 interface AdminDeleteButtonProps {
   productId: string;
@@ -18,22 +17,16 @@ export default function AdminDeleteButton({
   const router = useRouter();
 
   const handleDelete = async () => {
-    if (
-      !confirm(
-        `Delete "${productName}"? This cannot be undone.`
-      )
-    )
-      return;
+    if (!confirm(`Delete "${productName}"? This cannot be undone.`)) return;
 
     setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase
-      .from("products")
-      .delete()
-      .eq("id", productId);
+    const res = await fetch(`/admin/api/products/${productId}`, {
+      method: "DELETE",
+    });
 
-    if (error) {
-      alert("Failed to delete: " + error.message);
+    if (!res.ok) {
+      const data = await res.json();
+      alert("Failed to delete: " + data.error);
     } else {
       router.refresh();
     }

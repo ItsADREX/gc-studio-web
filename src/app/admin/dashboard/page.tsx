@@ -1,7 +1,6 @@
 import { createReadonlyClient } from "@/lib/supabase/readonly";
 import Link from "next/link";
 import Image from "next/image";
-import { products as staticProducts } from "@/data/products";
 import AdminDeleteButton from "@/components/admin/AdminDeleteButton";
 import AdminSeedButton from "@/components/admin/AdminSeedButton";
 import { Plus, LogOut, Package, Star } from "lucide-react";
@@ -50,7 +49,7 @@ export default async function AdminDashboardPage() {
           </div>
           <div className="flex items-center gap-3">
             {dbEmpty && (
-              <AdminSeedButton initialProducts={staticProducts} />
+              <AdminSeedButton />
             )}
             <Link
               href="/admin/products/new"

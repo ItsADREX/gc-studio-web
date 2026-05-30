@@ -3,47 +3,22 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Database } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { Product } from "@/types";
 
-interface AdminSeedButtonProps {
-  initialProducts: Product[];
-}
-
-export default function AdminSeedButton({ initialProducts }: AdminSeedButtonProps) {
+export default function AdminSeedButton() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSeed = async () => {
-    if (
-      !confirm(
-        `Seed the database with ${initialProducts.length} products? This will add all existing products.`
-      )
-    )
-      return;
+    if (!confirm("Seed the database with all existing products?")) return;
 
     setLoading(true);
-    const supabase = createClient();
+    const res = await fetch("/admin/api/seed", { method: "POST" });
+    const data = await res.json();
 
-    const rows = initialProducts.map((p) => ({
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      price: p.price,
-      category: p.category,
-      images: p.images,
-      featured: p.featured,
-      in_stock: p.inStock,
-      tags: p.tags ?? [],
-    }));
-
-    const { error } = await supabase
-      .from("products")
-      .upsert(rows, { onConflict: "id" });
-
-    if (error) {
-      alert("Seed failed: " + error.message);
+    if (!res.ok) {
+      alert("Seed failed: " + data.error);
     } else {
+      alert(`Done! ${data.count} products seeded.`);
       router.refresh();
     }
     setLoading(false);
