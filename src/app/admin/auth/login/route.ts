@@ -6,9 +6,10 @@ export async function POST(request: Request) {
   const adminPassword = process.env.ADMIN_PASSWORD;
 
   if (!adminPassword) {
+    console.error("[admin/login] ADMIN_PASSWORD env var is not set");
     return NextResponse.json(
       { error: "Admin password not configured on server." },
-      { status: 500 }
+      { status: 503 }
     );
   }
 
